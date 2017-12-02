@@ -1,0 +1,6 @@
+ipywidgets==5.2.2
+jupyter==1.0.0
+numpy==1.11.3
+plotly==2.2.2
+scipy==0.18.1
+widgetsnbextension==1.2.6
