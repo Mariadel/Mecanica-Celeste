@@ -9,7 +9,6 @@ import numpy as np
 import math
 import random
 import scipy.special as ss
-from matplotlib import pyplot as plt
 from aux import *
 
 
