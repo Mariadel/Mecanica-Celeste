@@ -9,7 +9,7 @@ import numpy as np
 import math
 import random
 import scipy.special as ss
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 from aux import *
 
 
@@ -18,22 +18,24 @@ global planets
 global epsilon
 global a
 global period
+global Omega
+global omega
 global w
-
-
-#Todo: los planetas no deben dibujar el Sol
+global colors
 
 planets = np.array(["Mercurio","Venus","Tierra", "Marte","Júpiter","Saturno","Urano","Neptuno"])
 a = np.array([0.387,0.723,1,1.524,5.203,9.546,19.2,30.09])
 epsilon = np.array([0.206,0.007,0.017,0.093,0.048,0.056,0.047,0.009])   
 period = np.array([87.97,224.7,365.26,686.98,4332.6,10759,30687,60784])
-w = [math.pi/2,1,0,1,1,1,1,1,]
-
-
-#TODO: cambiar w
+Omega = np.array([47.14,75.78,0,48.78,99.44,112.79,73.48,130.68])
+omega = np.array([75.9,130.15,101.22,334.22,12.72,91.09,169.06,43.83])
+w = omega - Omega
+w = np.array([math.radians(i) for i in w])
+colors = np.array(['rgb(100, 100, 100)','rgb(190, 100, 210)','rgb(0, 0, 250)','rgb(250, 0, 0)',
+                    'rgb(77, 0, 77)','rgb(100, 30, 30)','rgb(260, 150, 0)','rgb(0, 150, 150)'])
 
 class Planet:
-    def __init__(self,name, a,epsilon, period,w):
+    def __init__(self,name, a,epsilon, period,w, color):
         self.name = name
         self.a = a
         self.epsilon = epsilon
@@ -43,6 +45,7 @@ class Planet:
         self.w = w
         self.rot = np.array([[math.cos(self.w),-math.sin(self.w)],[math.sin(self.w),math.cos(self.w)]])
         self.orbit = None
+        self.color = color
 
     #Function to get Eccentric Anomaly with Newton Raphson method
     def getEccentricAnomaly(self,t):
@@ -54,7 +57,6 @@ class Planet:
 
     #Function to get the position of the given planet at time t
     def getPosition(self,t): 
-        t = t%self.period
         u = self.getEccentricAnomaly(t)
         eps = self.epsilon
         return np.dot(self.rot,self.a*np.array([math.cos(u)-eps,math.sqrt(1-eps**2)*math.sin(u)]))
@@ -98,7 +100,6 @@ class Planet:
         theta = self.getRealAnomaly(t)
         return np.array([math.cos(theta+self.w),math.sin(theta+self.w)])*self.a*(1-self.epsilon**2)/(1+self.epsilon*math.cos(theta))
 
-
     #Function to get Energy of a planet
     def getEnergy(self,t):
         kineticEnergy = 0.5*self.getSpeedModul(t)**2
@@ -107,57 +108,39 @@ class Planet:
     
     #Function to get Energy of a planet with the constant expression
     def getEnergy_constant(self):
-        print(self.epsilon**2)
-        print(self.a)
         return -np.linalg.norm(self.c)**2/(2*self.a**2*(1-self.epsilon**2))
 
     #Function to get the Real anomaly of a given planet given eccentric anomaly
-    def getRealAnomaly(self,u):
+    def getRealAnomaly_2(self,u):
         eps = self.epsilon
-        return math.acos((math.cos(u)-eps)/(1-eps*math.cos(u)))%(2*math.pi)#TODO: tener en cuenta el signo
+        theta = math.acos((math.cos(u)-eps)/(1-eps*math.cos(u)))
 
-    #Function to calculate 
+        if u%(2*math.pi) > math.pi:
+            theta =  2*math.pi-theta
+        return theta    
+
+    #Function to calculate the orbit of the planet
     def getOrbit(self):
         if self.orbit is None:
             N = 500
-            self.orbit = np.asarray([self.getPosition(self.period*i/N) for i in range(N+1)]) 
+            self.orbit = np.asarray([self.getPosition(self.period*i/N) for i in range(N)]) 
         return self.orbit
 
-
-#TODO: change speed formula
-#TODO: cambiar el Sol
+    #Function to calculate N points of the planet's orbit
+    def getPoints(self,N):
+        return  np.asarray([self.getPosition(self.period*i/N) for i in range(N)]) 
 
     def __str__(self):
         return self.name
+
 
 class SolarSistem:
     def __init__(self):
         self.planets = []
         for i in range(len(planets)):
-            self.planets.append(Planet(planets[i],a[i],epsilon[i],period[i],w[i]))  
+            self.planets.append(Planet(planets[i],a[i],epsilon[i],period[i],w[i],colors[i]))  
 
-
-
-#if __name__ == "__main__":
-#    main()
-
-
-#Dropdown, int text
-
-#interact manual
-
-
-#cells
-
-#im
-
-# Crear repo
-# hacer los requerimientos (pip freeze > requirements.txt)
 # mybinder.org
 
-
-#TODO: ver qué hacer con las funciones de cálculo numérico
-#TODO: hacer buenos plots
 #TODO: poner online
-#TODO: hacer interactivo(?)
 #TODO: hacer memoria

@@ -74,25 +74,31 @@ def runge_Kutta(t,f):
         t_i += h  
     return theta_n        
 
+#Function to plot the orbit of the planet
+def display_orbit(planet, t, opt, N):
+    position = planet.getPosition(t)   
+    planet_pos = go.Scattergl(x=[position[0]], y=[position[1]], name=planet.name, mode='markers', marker=dict(size=25,color=planet.color,line=dict(width=1, color=planet.color)))  
 
-def display_orbit(planet, t):
-    coordinates = planet.getOrbit()
-    position = planet.getPosition(t)
+    if opt:
+        coordinates = planet.getOrbit()
+        orbit = go.Scattergl(x=coordinates[:, 0], y=coordinates[:, 1], name="órbita de "+ planet.name,mode='lines', marker = dict(color = 'rgb(0,0,0)',size=3,line = dict(width = 0)))
+    else:
+        coordinates = planet.getPoints(N)
+        
+        orbit = go.Scattergl(x=coordinates[:, 0], y=coordinates[:, 1], name="órbita de "+ planet.name,mode='markers', marker = dict(color = 'rgb(0,0,0)',size=6,line = dict(width = 0)))
 
-    planet_pos = go.Scattergl(x=[position[0]], y=[position[1]], name=planet.name, mode='markers', marker=dict(size=25,color='rgb(250, 100, 0)',line=dict(width=1, color='rgb(250,100,0)')))
-    sun = go.Scattergl(x=[0], y=[0],name='Sol',mode='markers',marker=dict(size=37,color='rgb(250, 250, 0)',line=dict(width=1, color='rgb(100,100,0)')))
-    orbit = go.Scattergl(x=coordinates[:, 0], y=coordinates[:, 1], name="órbita de "+ planet.name,mode='markers', marker = dict(color = 'rgb(0,0,0)',size=3,line = dict(width = 0)))
+    sun = go.Scattergl(x=[0], y=[0],name='Sol',mode='markers',marker=dict(size=35,color='rgb(250, 250, 0)',line=dict(width=1, color='rgb(100,100,0)')))
 
     r = int(planet.a)*2
-    layout = go.Layout(width=1000, height=700,xaxis=dict(anchor='y',range=[-r, r]),
-            yaxis=dict(anchor='x',autorange=False,range=[-r, r],))
+    layout = go.Layout(width=1000, height=700,xaxis=dict(anchor='y',range=[-r, r]), yaxis=dict(anchor='x',autorange=False,range=[-r, r],))
 
-    data = [planet_pos,orbit,sun]
+    data = [sun, orbit,planet_pos]
     fig = go.Figure(data=data, layout=layout)
     py.iplot(fig)   
-    #py.plot(fig) 
 
-def showInfo(planet,t,u):
+
+#Function to display Info
+def showInfo(planet,t,u,opt,N):
     print("Información para ", planet.name," en el día ", t)    
     t = t%planet.period
     print("Posición: ", planet.getPosition(t))
@@ -105,11 +111,10 @@ def showInfo(planet,t,u):
     print("Momento angular (expresión en función del tiempo): ", planet.getAngularMomentum(t))
     print("Momento angular (expresión constante): ", planet.c)
 
-    #u = float(input("Introduzca una anomalía excéntrica: "))
-    print("Para una anomalía excéntrica de ", u, "la anomalía real es: ",planet.getRealAnomaly(u))
+    print("Para una anomalía excéntrica de ", u, "la anomalía real es: ",planet.getRealAnomaly_2(u))
 
     print("Anomalía excéntrica (mediante el método de Newton-Raphson): ",planet.getEccentricAnomaly(t))
     print("Anomalía excéntrica (mediante funciones de Bessel): ",planet.getEccentricAnomaly_Bessel(t))
     print("La diferencia obtenida entre ambos métodos es: ",abs(planet.getEccentricAnomaly(t) - planet.getEccentricAnomaly_Bessel(t)))
 
-    display_orbit(planet,t)
+    display_orbit(planet,t,opt,N)
