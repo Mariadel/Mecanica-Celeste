@@ -5,10 +5,6 @@
 # Mecánica Celeste                                                                           #                                   
 #                                                                                            # 
 ##############################################################################################
-import numpy as np
-import math
-import random
-import scipy.special as ss
 from aux import *
 
 
@@ -138,8 +134,3 @@ class SolarSistem:
         self.planets = []
         for i in range(len(planets)):
             self.planets.append(Planet(planets[i],a[i],epsilon[i],period[i],w[i],colors[i]))  
-
-# mybinder.org
-
-#TODO: poner online
-#TODO: hacer memoria

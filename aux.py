@@ -94,7 +94,7 @@ def display_orbit(planet, t, opt, N):
 
     data = [sun, orbit,planet_pos]
     fig = go.Figure(data=data, layout=layout)
-    py.iplot(fig)   
+    py.iplot(fig) 
 
 
 #Function to display Info
