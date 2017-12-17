@@ -113,14 +113,11 @@ def display_orbit(planet, t, opt, N, a,b):
 
     if opt:
         coordinates = planet.getOrbit()
-        #print(coordinates)
-        #coordinates = np.array([translate(i,a,b,t) for i in coordinates])
+        z  = coordinates
         N = 500
         T = np.array([planet.period*i/N for i in range(len(coordinates))])
-
         sun_orbit = np.array([translate(getSunPosition(coordinates[i], planet.mass, M),a,b,T[i]) for i in range(len(coordinates))])
-        coordinates = np.array([translate(x,a,b,t) for x in coordinates])
-        #print(coordinates)
+        coordinates = np.array([translate(coordinates[i],a,b,T[i]) for i in range(len(coordinates))])
         orbit = go.Scatter3d(x=sun_orbit[:, 0], y=sun_orbit[:, 1],z = sun_orbit[:,2], name="órbita del Sol" ,mode='lines', marker = dict(color = 'rgb(0,0,0)',size=3,line = dict(width = 0)))
         orbit = go.Scatter3d(x=coordinates[:, 0], y=coordinates[:, 1],z = coordinates[:,2], name="órbita de "+ planet.name,mode='lines', marker = dict(color = 'rgb(0,0,0)',size=3,line = dict(width = 0)))
     else:
