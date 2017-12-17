@@ -35,7 +35,7 @@ def getInitialPoint(u_0,t,period,gi,eps):
 #Implementation of Newton-Raphson method to get eccentric Anomaly
 def getEccentricAnomaly_Newton(t, period, eps):
     u_0 = math.pi
-    tol = 0.00001
+    tol = 0.000001
 
     ji = 2*math.pi*t/period
     nsv = int(ji/math.pi)  
@@ -105,7 +105,6 @@ def translate(v,a,b,t):
     return v + a + b*t
 
 
-
 #Function to plot the orbit of the planet
 def display_orbit(planet, t, opt, N, a,b):
     position = translate(planet.getPosition(t),a,b,t)
@@ -113,7 +112,12 @@ def display_orbit(planet, t, opt, N, a,b):
 
     if opt:
         coordinates = planet.getOrbit()
-        coordinates = np.array([translate(i,a,b,t) for i in coordinates])
+        #print(coordinates)
+        #coordinates = np.array([translate(i,a,b,t) for i in coordinates])
+        N = 500
+        sun_orbit = np.array([getSunPosition(coordinates[i], planet.mass, M) for i in range(N*3)])
+        #print(coordinates)
+        orbit = go.Scatter3d(x=sun_orbit[:, 0], y=sun_orbit[:, 1],z = sun_orbit[:,2], name="órbita del Sol" ,mode='lines', marker = dict(color = 'rgb(0,0,0)',size=3,line = dict(width = 0)))
         orbit = go.Scatter3d(x=coordinates[:, 0], y=coordinates[:, 1],z = coordinates[:,2], name="órbita de "+ planet.name,mode='lines', marker = dict(color = 'rgb(0,0,0)',size=3,line = dict(width = 0)))
     else:
         coordinates = planet.getPoints(N)
@@ -152,22 +156,6 @@ def display_orbit(planet, t, opt, N, a,b):
     r_4 = np.min(coordinates, axis = 0)
     r_5 = np.max(r_3 - r_4)
     dif = np.array([r_5 for i in range(3)]) - (r_3 - r_4)
-
-    
-    #layout = go.Layout(
-    #                scene = dict(
-    #                xaxis = dict(
-    #                    nticks=4, range = [r_4[0] - dif[0]/2,r_4[0] + dif[0]/2],),
-    #                yaxis = dict(
-    #                    nticks=4, range = [r_4[1] - dif[1]/2,r_4[1] + dif[1]/2],),
-    #                zaxis = dict(
-    #                    nticks=4, range = [r_4[2] - dif[2]/2,r_4[2] + dif[2]/2],),),
-    #                width=700,
-    #                margin=dict(
-    #                r=20, l=10,
-    #                b=10, t=10)
-    #              )
-    #layout = go.Layout(width=1000, height=700,xaxis=dict(anchor='y',range=[-r, r]), yaxis=dict(anchor='x',autorange=True,range=[-r, r],))
 
     data = [sun, orbit,planet_pos]
     fig = go.Figure(data=data, layout=layout)

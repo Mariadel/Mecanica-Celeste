@@ -51,10 +51,22 @@ class Planet:
         self.rot = np.dot(np.array([[math.cos(i)+math.cos(Omega)**2*(1-math.cos(i)), math.cos(Omega)*math.sin(Omega)*(1-math.cos(i)),-math.sin(Omega)*math.sin(i)],
                     [math.cos(Omega)*math.sin(Omega)*(1-math.cos(i)),math.cos(i)+math.sin(Omega)**2*(1-math.cos(i)),-math.cos(Omega)*math.sin(i)],
                     [math.sin(Omega)*math.sin(i), math.cos(Omega)*math.sin(i),math.cos(i)]]),self.rot)
+        self.getC_m()
         self.getAngularMomentum_constant()
 
         self.orbit = None
         self.color = color
+
+    def getC_m(self):
+        u_0 = self.getEccentricAnomaly(0)
+        u_1 = self.getEccentricAnomaly(1)
+        eps = self.epsilon
+        x_0 = np.dot(self.rot,self.a*np.array([math.cos(u_0)-eps,math.sqrt(1-eps**2)*math.sin(u_0),0]))
+        x_1 = np.dot(self.rot,self.a*np.array([math.cos(u_1)-eps,math.sqrt(1-eps**2)*math.sin(u_1),0]))
+        a = getC_m_2(self.mass, M, x_0,x_1)
+        self.alpha = a[0] 
+        self.beta = a[1] + 0.01 
+
 
     #Function to calculate period
     def calculatePeriod(self):
@@ -72,7 +84,9 @@ class Planet:
     def getPosition(self,t): 
         u = self.getEccentricAnomaly(t)
         eps = self.epsilon
-        return np.dot(self.rot,self.a*np.array([math.cos(u)-eps,math.sqrt(1-eps**2)*math.sin(u),0]))
+        x = np.dot(self.rot,self.a*np.array([math.cos(u)-eps,math.sqrt(1-eps**2)*math.sin(u),0]))
+        x_translated = translate(x, self.alpha, self.beta, t)
+        return x_translated
     
     #Function to get the distance of the given planet at time t
     def getDistance(self,t):
@@ -139,7 +153,7 @@ class Planet:
     def getOrbit(self):
         if self.orbit is None:
             N = 500
-            self.orbit = np.asarray([self.getPosition(self.period*i/N) for i in range(N)]) 
+            self.orbit = np.asarray([self.getPosition(self.period*i/N) for i in range(N*3)]) 
         return self.orbit
 
     #Function to calculate N points of the planet's orbit
@@ -165,13 +179,13 @@ class Planet_2:
         self.epsilon = epsilon
         self.period = period
         self.getMu()
-        self.getAngularMomentum_constant()
         self.w = w
         self.i = i
         self.rot = np.array([[math.cos(self.w),-math.sin(self.w),0],[math.sin(self.w),math.cos(self.w),0],[0,0,1]])
         self.rot = np.dot(np.array([[math.cos(i)+math.cos(Omega)**2*(1-math.cos(i)), math.cos(Omega)*math.sin(Omega)*(1-math.cos(i)),-math.sin(Omega)*math.sin(i)],
                     [math.cos(Omega)*math.sin(Omega)*(1-math.cos(i)),math.cos(i)+math.sin(Omega)**2*(1-math.cos(i)),-math.cos(Omega)*math.sin(i)],
                     [math.sin(Omega)*math.sin(i), math.cos(Omega)*math.sin(i),math.cos(i)]]),self.rot)
+        self.getAngularMomentum_constant()
         self.orbit = None
         self.color = color
 
@@ -215,7 +229,7 @@ class Planet_2:
     
     #Function to get angular Momentum
     def getAngularMomentum_constant(self):
-        self.c = np.array([0,0,math.sqrt(self.mu*self.a*(1-self.epsilon**2))])
+        self.c = np.dot(self.rot,np.array([0,0,math.sqrt(self.mu*self.a*(1-self.epsilon**2))]))
 
     #Funtion to get theta derivative given theta
     def theta_deriv(self,t,theta):
