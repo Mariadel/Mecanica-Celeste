@@ -109,7 +109,7 @@ def translate(v,a,b,t):
 def display_orbit(planet, t, opt, N, a,b):
     x = planet.getPosition(t)
     position = translate(x,a,b,t)
-    planet_pos = go.Scatter3d(x=[position[0]], y=[position[1]], z = [position[2]], name=planet.name, mode='markers', marker=dict(size=5,color=planet.color,line=dict(width=1, color=planet.color)))  
+    planet_pos = go.Scatter3d(x=[position[0]], y=[position[1]], z = [position[2]], name=planet.name, mode='markers', marker=dict(size=4,color=planet.color,line=dict(width=1, color=planet.color)))  
 
     if opt:
         coordinates = planet.getOrbit()
@@ -118,20 +118,24 @@ def display_orbit(planet, t, opt, N, a,b):
         T = np.array([planet.period*i/N for i in range(len(coordinates))])
         sun_orbit = np.array([translate(getSunPosition(coordinates[i], planet.mass, M),a,b,T[i]) for i in range(len(coordinates))])
         coordinates = np.array([translate(coordinates[i],a,b,T[i]) for i in range(len(coordinates))])
-        orbit = go.Scatter3d(x=sun_orbit[:, 0], y=sun_orbit[:, 1],z = sun_orbit[:,2], name="órbita del Sol" ,mode='lines', marker = dict(color = 'rgb(0,0,0)',size=3,line = dict(width = 0)))
+        orbit_2 = go.Scatter3d(x=sun_orbit[:, 0], y=sun_orbit[:, 1],z = sun_orbit[:,2], name="órbita del Sol" ,mode='lines', marker = dict(color = 'rgb(0,0,1)',size=2,line = dict(width = 0)))
         orbit = go.Scatter3d(x=coordinates[:, 0], y=coordinates[:, 1],z = coordinates[:,2], name="órbita de "+ planet.name,mode='lines', marker = dict(color = 'rgb(0,0,0)',size=3,line = dict(width = 0)))
     else:
+        N = 500
         coordinates = planet.getPoints(N)
+        T = np.array([planet.period*i/N for i in range(len(coordinates))])
+        sun_orbit = np.array([translate(getSunPosition(coordinates[i], planet.mass, M),a,b,T[i]) for i in range(len(coordinates))])
         coordinates = np.array([translate(i,a,b,t) for i in coordinates])
         
         orbit = go.Scatter3d(x=coordinates[:, 0], y=coordinates[:, 1], z = coordinates[:,2],name="órbita de "+ planet.name,mode='markers', marker = dict(color = 'rgb(0,0,0)',size=1,line = dict(width = 0)))
+        orbit_2 = go.Scatter3d(x=sun_orbit[:, 0], y=sun_orbit[:, 1],z = sun_orbit[:,2], name="órbita del Sol" ,mode='lines', marker = dict(color = 'rgb(0,0,1)',size=3,line = dict(width = 0)))
 
     sun_poss = translate(getSunPosition(x, planet.mass, M),a,b,t)
     print("Posición del Sol: ("+str(sun_poss[0])+", "+str(sun_poss[1])+", "+str(sun_poss[2])+") ")
     sun_speed = -planet.getSpeed(t)*planet.mass/M
     print("Velocidad del Sol: ("+str(sun_speed[0])+", "+str(sun_speed[1])+", "+str(sun_speed[2])+") ")
 
-    sun = go.Scatter3d(x = [sun_poss[0]], y = [sun_poss[1]], z = [sun_poss[2]],name='Sol',mode='markers',marker=dict(size=15,color='rgb(250, 250, 0)',line=dict(width=1, color='rgb(100,100,0)')))
+    sun = go.Scatter3d(x = [sun_poss[0]], y = [sun_poss[1]], z = [sun_poss[2]],name='Sol',mode='markers',marker=dict(size=6,color='rgb(250, 250, 0)',line=dict(width=1, color='rgb(100,100,0)')))
 
     #r = int(planet.a)*2
     r = np.max(coordinates,axis = 0)
@@ -141,11 +145,11 @@ def display_orbit(planet, t, opt, N, a,b):
     layout = go.Layout(
                     scene = dict(
                     xaxis = dict(
-                        nticks=4, range = [r_2,r],),
+                        nticks=4, autorange=False,range = [r_2,r],),
                     yaxis = dict(
-                        nticks=4, range = [r_2,r],),
+                        nticks=4, autorange=False,range = [r_2,r],),
                     zaxis = dict(
-                        nticks=4, range = [r_2,r],),),
+                        nticks=4, autorange=False,range = [r_2,r],),),
                     width=700,
                     margin=dict(
                     r=20, l=10,
@@ -158,7 +162,7 @@ def display_orbit(planet, t, opt, N, a,b):
     r_5 = np.max(r_3 - r_4)
     dif = np.array([r_5 for i in range(3)]) - (r_3 - r_4)
 
-    data = [sun, orbit,planet_pos]
+    data = [sun, orbit,planet_pos, orbit_2]
     fig = go.Figure(data=data, layout=layout)
     py.iplot(fig) 
 
@@ -177,6 +181,7 @@ def getC_m_2(m,M,x_0,speed_0):
 def showInfo(planet,t,u,opt,N):
     sol_1 = np.array([0.001, 0.001, 0.001])
     alpha , beta = getC_m_2(planet.mass, M, planet.getPosition(0), planet.getPosition(1))
+    alpha, beta = np.array([0.03, 0, 0.041]),np.array([0.01, 0.02, 0.051])
     print("Información para ", planet.name," en el día ", t)    
     #t = t%planet.period
     print("Posición: ", translate(planet.getPosition(t),alpha,beta,t))
@@ -197,12 +202,6 @@ def showInfo(planet,t,u,opt,N):
     print("El centro de masas es: ", alpha + beta*t)
 
     display_orbit(planet,t,opt,N,alpha,beta)
-
-
-
-
-
-
 
 
 #Function to plot the orbit of the planet
@@ -247,27 +246,10 @@ def display_orbit_2(planet, t, opt, N):
     r_5 = np.max(r_3 - r_4)
     dif = np.array([r_5 for i in range(3)]) - (r_3 - r_4)
 
-    
-    #layout = go.Layout(
-    #                scene = dict(
-    #                xaxis = dict(
-    #                    nticks=4, range = [r_4[0] - dif[0]/2,r_4[0] + dif[0]/2],),
-    #                yaxis = dict(
-    #                    nticks=4, range = [r_4[1] - dif[1]/2,r_4[1] + dif[1]/2],),
-    #                zaxis = dict(
-    #                    nticks=4, range = [r_4[2] - dif[2]/2,r_4[2] + dif[2]/2],),),
-    #                width=700,
-    #                margin=dict(
-    #                r=20, l=10,
-    #                b=10, t=10)
-    #              )
-    #layout = go.Layout(width=1000, height=700,xaxis=dict(anchor='y',range=[-r, r]), yaxis=dict(anchor='x',autorange=True,range=[-r, r],))
 
     data = [sun, orbit,planet_pos]
     fig = go.Figure(data=data, layout=layout)
     py.iplot(fig) 
-
-
 
 
 #Function to display Info

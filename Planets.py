@@ -154,7 +154,7 @@ class Planet:
     def getOrbit(self):
         if self.orbit is None:
             N = 500
-            self.orbit = np.asarray([self.getPosition(self.period*i/N) for i in range(N*5)]) 
+            self.orbit = np.asarray([self.getPosition(self.period*i/N) for i in range(N*2)]) 
         return self.orbit
 
     #Function to calculate N points of the planet's orbit
