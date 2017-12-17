@@ -107,7 +107,8 @@ def translate(v,a,b,t):
 
 #Function to plot the orbit of the planet
 def display_orbit(planet, t, opt, N, a,b):
-    position = translate(planet.getPosition(t),a,b,t)
+    x = planet.getPosition(t)
+    position = translate(x,a,b,t)
     planet_pos = go.Scatter3d(x=[position[0]], y=[position[1]], z = [position[2]], name=planet.name, mode='markers', marker=dict(size=5,color=planet.color,line=dict(width=1, color=planet.color)))  
 
     if opt:
@@ -115,7 +116,10 @@ def display_orbit(planet, t, opt, N, a,b):
         #print(coordinates)
         #coordinates = np.array([translate(i,a,b,t) for i in coordinates])
         N = 500
-        sun_orbit = np.array([getSunPosition(coordinates[i], planet.mass, M) for i in range(N*3)])
+        T = np.array([planet.period*i/N for i in range(len(coordinates))])
+
+        sun_orbit = np.array([translate(getSunPosition(coordinates[i], planet.mass, M),a,b,T[i]) for i in range(len(coordinates))])
+        coordinates = np.array([translate(x,a,b,t) for x in coordinates])
         #print(coordinates)
         orbit = go.Scatter3d(x=sun_orbit[:, 0], y=sun_orbit[:, 1],z = sun_orbit[:,2], name="órbita del Sol" ,mode='lines', marker = dict(color = 'rgb(0,0,0)',size=3,line = dict(width = 0)))
         orbit = go.Scatter3d(x=coordinates[:, 0], y=coordinates[:, 1],z = coordinates[:,2], name="órbita de "+ planet.name,mode='lines', marker = dict(color = 'rgb(0,0,0)',size=3,line = dict(width = 0)))
@@ -125,7 +129,7 @@ def display_orbit(planet, t, opt, N, a,b):
         
         orbit = go.Scatter3d(x=coordinates[:, 0], y=coordinates[:, 1], z = coordinates[:,2],name="órbita de "+ planet.name,mode='markers', marker = dict(color = 'rgb(0,0,0)',size=1,line = dict(width = 0)))
 
-    sun_poss = translate(getSunPosition(position, planet.mass, M),a,b,t)
+    sun_poss = translate(getSunPosition(x, planet.mass, M),a,b,t)
     print("Posición del Sol: ("+str(sun_poss[0])+", "+str(sun_poss[1])+", "+str(sun_poss[2])+") ")
     sun_speed = -planet.getSpeed(t)*planet.mass/M
     print("Velocidad del Sol: ("+str(sun_speed[0])+", "+str(sun_speed[1])+", "+str(sun_speed[2])+") ")

@@ -64,8 +64,9 @@ class Planet:
         x_0 = np.dot(self.rot,self.a*np.array([math.cos(u_0)-eps,math.sqrt(1-eps**2)*math.sin(u_0),0]))
         x_1 = np.dot(self.rot,self.a*np.array([math.cos(u_1)-eps,math.sqrt(1-eps**2)*math.sin(u_1),0]))
         a = getC_m_2(self.mass, M, x_0,x_1)
-        self.alpha = a[0] 
-        self.beta = a[1] + 0.01 
+        self.alpha = a[0]# + 0.0001 
+        self.beta = a[1]# + 0.0005 
+        #print(a)
 
 
     #Function to calculate period
@@ -85,12 +86,12 @@ class Planet:
         u = self.getEccentricAnomaly(t)
         eps = self.epsilon
         x = np.dot(self.rot,self.a*np.array([math.cos(u)-eps,math.sqrt(1-eps**2)*math.sin(u),0]))
-        x_translated = translate(x, self.alpha, self.beta, t)
-        return x_translated
+        return x
     
     #Function to get the distance of the given planet at time t
     def getDistance(self,t):
-        return np.linalg.norm(self.getPosition(t))
+        x = self.getPosition(t)
+        return np.linalg.norm(abs(x-getSunPosition(x,self.mass, M)))
 
     #Auxiliar function to get mu given the planet index
     def getMu(self, sun_mass, G):
@@ -153,7 +154,7 @@ class Planet:
     def getOrbit(self):
         if self.orbit is None:
             N = 500
-            self.orbit = np.asarray([self.getPosition(self.period*i/N) for i in range(N*3)]) 
+            self.orbit = np.asarray([self.getPosition(self.period*i/N) for i in range(N*5)]) 
         return self.orbit
 
     #Function to calculate N points of the planet's orbit
